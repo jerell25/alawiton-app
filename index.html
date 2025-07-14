@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Christian Songs App</title>
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Bootstrap Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+  <!-- Custom CSS -->
+  <style>
+    body { padding: 0; } /* Remove default body padding */
+    body.dark-mode {
+      background-color: #1c2526;
+      color: #e9ecef;
+    }
+    body.dark-mode .song-card {
+      background-color: #2c3e50;
+      border-color: #495057;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    }
+    body.dark-mode .song-title {
+      color: #e9ecef;
+    }
+    body.dark-mode .song-title:hover {
+      color: #4dabf7;
+      background-color: #343a40;
+    }
+    body.dark-mode .header-box {
+      background-color: #2c3e50;
+      border-color: #495057;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    }
+    body.dark-mode .header-box:hover {
+      background-color: #343a40;
+    }
+    body.dark-mode .header-box:active {
+      background-color: #495057;
+    }
+    body.dark-mode .btn-subtle {
+      background-color: #495057;
+      border-color: #6c757d;
+      color: #e9ecef;
+    }
+    body.dark-mode .btn-subtle:hover {
+      background-color: #6c757d;
+      color: #f8f9fa;
+    }
+    body.dark-mode .sidebar {
+      background-color: #2c3e50;
+      border-color: #495057;
+    }
+    body.dark-mode .sidebar-item {
+      background-color: #495057;
+      border-color: #6c757d;
+      color: #e9ecef;
+    }
+    body.dark-mode .sidebar-item:hover {
+      background-color: #6c757d;
+      color: #4dabf7;
+    }
+    .song-card { 
+      margin-bottom: 5px; /* Minimal vertical spacing */
+      background-color: #ffffff; /* White background */
+      border: 1px solid #e9ecef; /* Subtle border */
+      border-radius: 8px; /* Rounded corners */
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); /* Light shadow */
+      transition: transform 0.2s, box-shadow 0.2s; /* Smooth hover effect */
+    }
+    .song-card:hover {
+      transform: translateY(-2px); /* Slight lift on hover */
+      box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15); /* Stronger shadow */
+    }
+    .song-title { 
+      cursor: pointer; 
+      color: #343a40; /* Dark gray for contrast */
+      text-decoration: none; /* Remove blue underline */
+      padding: 10px; /* Minimal padding for touch target */
+      margin: 0; /* No internal margins */
+      display: block; /* Full card clickable */
+      font-size: 1.1rem; /* Slightly larger font */
+    }
+    .song-title:hover {
+      color: #007bff; /* Blue on hover */
+      background-color: #f8f9fa; /* Light background on hover */
+    }
+    .header-box {
+      background-color: #f8f9fa; /* Light gray background */
+      border: 1px solid #dee2e6; /* Subtle border */
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Light shadow */
+      padding: 10px 0; /* Vertical padding only */
+      border-radius: 5px; /* Rounded corners */
+      margin-bottom: 20px; /* Spacing below */
+      width: 100%; /* Full width */
+      margin-left: 0;
+      margin-right: 0;
+      transition: background-color 0.2s; /* Smooth color transition */
+    }
+    .header-box:hover {
+      background-color: #e9ecef; /* Slightly darker on hover */
+    }
+    .header-box:active {
+      background-color: #dee2e6; /* Even darker on click */
+    }
+    .header-container { 
+      display: flex; 
+      align-items: center; 
+      justify-content: space-between; 
+      gap: 10px; 
+      max-width: 1200px; /* Constrain inner content */
+      margin: 0 auto; /* Center content */
+      padding: 0 15px; /* Horizontal padding for content */
+    }
+    .header-container h1 { 
+      margin: 0; 
+      font-size: 1.5rem; 
+      flex-grow: 1; 
+      text-align: center; 
+    }
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 100%;
+      width: 250px;
+      background-color: #ffffff;
+      border-right: 1px solid #dee2e6;
+      transform: translateX(-100%); /* Hidden by default */
+      transition: transform 0.3s ease-in-out;
+      z-index: 1000;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .sidebar.active {
+      transform: translateX(0); /* Visible when active */
+    }
+    .sidebar-item {
+      display: inline-block;
+      font-size: 0.9rem;
+      padding: 5px;
+      background-color: #e9ecef;
+      border: 1px solid #ced4da;
+      color: #6c757d;
+      text-decoration: none;
+      text-align: center;
+      border-radius: 4px;
+      margin-bottom: 10px;
+      width: 100%;
+    }
+    .sidebar-item:hover {
+      background-color: #dee2e6;
+      color: #007bff;
+    }
+    .search-container { position: relative; }
+    .search-input { 
+      display: none; 
+      position: absolute; 
+      top: 0; 
+      right: 0; 
+      width: 200px; 
+      z-index: 1000; 
+    }
+    .search-input.active { display: block; }
+    .btn-subtle { 
+      font-size: 0.9rem; /* Smaller icon size */
+      padding: 5px; /* Reduced padding */
+      background-color: #e9ecef; /* Light gray background */
+      border: 1px solid #ced4da; /* Subtle border */
+      color: #6c757d; /* Muted icon color */
+      line-height: 1; 
+    }
+    .btn-subtle:hover { 
+      background-color: #dee2e6; /* Slightly darker on hover */
+      color: #495057; 
+    }
+    .content-container { 
+      max-width: 1200px; /* Constrain song list width */
+      margin: 0 auto; /* Center content */
+      padding: 0 15px; /* Match Bootstrap container padding */
+    }
+    .row { --bs-gutter-x: 0; } /* Remove grid gutters */
+    .no-favorites { 
+      text-align: center; 
+      color: #6c757d; 
+      margin-top: 20px; 
+      font-size: 1.1rem; 
+    }
+    body.dark-mode .no-favorites { 
+      color: #e9ecef; 
+    }
+  </style>
+  <!-- PWA Meta Tags -->
+  <meta name="theme-color" content="#ffffff">
+  <link rel="manifest" href="manifest.json">
+</head>
+<body>
+  <div class="header-box">
+    <div class="header-container">
+      <button class="btn btn-subtle" id="sidebarToggle">
+        <i class="bi bi-list"></i>
+      </button>
+      <h1>Christian Songs</h1>
+      <div class="search-container">
+        <button class="btn btn-subtle" id="searchToggle">
+          <i class="bi bi-search"></i>
+        </button>
+        <input type="text" id="searchInput" class="form-control search-input" placeholder="Search songs by title or page number...">
+      </div>
+    </div>
+  </div>
+  <div class="sidebar" id="sidebar">
+    <div>
+      <a href="#" class="sidebar-item" id="favoritesLink">Favorites</a>
+    </div>
+    <div>
+      <a href="#" class="sidebar-item" id="darkModeToggle">Dark Mode</a>
+    </div>
+  </div>
+  <div class="content-container">
+    <!-- Song List -->
+    <div id="songList" class="row"></div>
+    <!-- Favorites List -->
+    <div id="favoritesList" class="row d-none"></div>
+  </div>
+
+  <!-- Bootstrap JS and Popper -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    let songs = [];
+    let favorites = JSON.parse(localStorage.getItem('favorites')) || [];
+
+    // Validate favorites array
+    if (!Array.isArray(favorites)) {
+      console.warn('Favorites is not an array, resetting:', favorites);
+      favorites = [];
+      localStorage.setItem('favorites', JSON.stringify(favorites));
+    }
+
+    // Load dark mode preference
+    if (localStorage.getItem('darkMode') === 'enabled') {
+      document.body.classList.add('dark-mode');
+      document.getElementById('darkModeToggle').textContent = 'Light Mode';
+    }
+
+    // Load songs from JSON file
+    function loadSongs() {
+      return fetch('songs.json')
+        .then(response => {
+          if (!response.ok) throw new Error('Failed to load songs.json');
+          return response.json();
+        })
+        .then(data => {
+          songs = data;
+          console.log('Songs loaded:', songs);
+          displaySongs(songs, 'songList');
+        })
+        .catch(error => console.error('Error loading songs:', error));
+    }
+
+    // Display songs in the specified container
+    function displaySongs(songsToShow, containerId) {
+      console.log('Displaying songs in container:', containerId, 'Songs:', songsToShow);
+      const container = document.getElementById(containerId);
+      container.innerHTML = '';
+      if (songsToShow.length === 0 && containerId === 'favoritesList') {
+        container.innerHTML = '<p class="no-favorites">No favorite songs yet. Add some from the lyrics page!</p>';
+      } else {
+        songsToShow.forEach(song => {
+          const card = `
+            <div class="col-md-4 song-card">
+              <a href="lyrics.html?id=${song.id}" class="song-title">${song.id}. ${song.title}</a>
+            </div>
+          `;
+          container.insertAdjacentHTML('beforeend', card);
+        });
+      }
+    }
+
+    // Display favorite songs
+    function displayFavorites() {
+      console.log('Favorites clicked, current favorites:', favorites);
+      if (!songs.length) {
+        console.warn('Songs not loaded yet, retrying...');
+        loadSongs().then(() => showFavorites());
+      } else {
+        showFavorites();
+      }
+    }
+
+    function showFavorites() {
+      const songList = document.getElementById('songList');
+      const favoritesList = document.getElementById('favoritesList');
+      songList.classList.add('d-none');
+      favoritesList.classList.remove('d-none');
+      const favoriteSongs = songs.filter(song => favorites.includes(song.id));
+      console.log('Favorite songs to display:', favoriteSongs);
+      displaySongs(favoriteSongs, 'favoritesList');
+    }
+
+    // Initialize songs
+    loadSongs();
+
+    // Sidebar toggle
+    const sidebarToggle = document.getElementById('sidebarToggle');
+    const sidebar = document.getElementById('sidebar');
+    sidebarToggle.addEventListener('click', function(e) {
+      e.preventDefault();
+      sidebar.classList.toggle('active');
+    });
+
+    // Hide sidebar when clicking outside
+    document.addEventListener('click', function(e) {
+      if (!sidebar.contains(e.target) && !sidebarToggle.contains(e.target) && sidebar.classList.contains('active')) {
+        sidebar.classList.remove('active');
+      }
+    });
+
+    // Favorites link handler
+    const favoritesLink = document.getElementById('favoritesLink');
+    if (favoritesLink) {
+      favoritesLink.addEventListener('click', function(e) {
+        e.preventDefault();
+        console.log('Favorites link clicked');
+        displayFavorites();
+        sidebar.classList.remove('active'); // Hide sidebar after clicking
+      });
+    } else {
+      console.error('Favorites link not found');
+    }
+
+    // Dark mode toggle
+    document.getElementById('darkModeToggle').addEventListener('click', function(e) {
+      e.preventDefault();
+      document.body.classList.toggle('dark-mode');
+      if (document.body.classList.contains('dark-mode')) {
+        localStorage.setItem('darkMode', 'enabled');
+        this.textContent = 'Light Mode';
+      } else {
+        localStorage.removeItem('darkMode');
+        this.textContent = 'Dark Mode';
+      }
+      sidebar.classList.remove('active'); // Hide sidebar after clicking
+    });
+
+    // Search functionality
+    document.getElementById('searchInput').addEventListener('input', function(e) {
+      const query = e.target.value.toLowerCase();
+      const filteredSongs = songs.filter(song =>
+        song.title.toLowerCase().includes(query) || 
+        song.id.toString().includes(query)
+      );
+      console.log('Search query:', query, 'Filtered songs:', filteredSongs);
+      document.getElementById('songList').classList.remove('d-none');
+      document.getElementById('favoritesList').classList.add('d-none');
+      displaySongs(filteredSongs, 'songList');
+    });
+
+    // Toggle search input visibility
+    const searchToggle = document.getElementById('searchToggle');
+    const searchInput = document.getElementById('searchInput');
+    
+    searchToggle.addEventListener('click', function() {
+      searchInput.classList.toggle('active');
+      if (searchInput.classList.contains('active')) {
+        searchInput.focus();
+      } else {
+        searchInput.value = ''; // Clear input when hiding
+        // Reset song list when search is cleared
+        document.getElementById('songList').classList.remove('d-none');
+        document.getElementById('favoritesList').classList.add('d-none');
+        displaySongs(songs, 'songList');
+      }
+    });
+
+    // Hide search input when clicking outside and input is empty
+    document.addEventListener('click', function(e) {
+      if (!searchToggle.contains(e.target) && !searchInput.contains(e.target) && searchInput.value === '') {
+        searchInput.classList.remove('active');
+        // Reset song list when search is cleared
+        document.getElementById('songList').classList.remove('d-none');
+        document.getElementById('favoritesList').classList.add('d-none');
+        displaySongs(songs, 'songList');
+      }
+    });
+
+    // Service Worker Registration
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js')
+        .then(() => console.log('Service Worker Registered'))
+        .catch(err => console.log('Service Worker Error:', err));
+    }
+  </script>
+</body>
+</html>

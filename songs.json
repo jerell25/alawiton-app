@@ -1,0 +1,22 @@
+[
+  {
+    "id": 1,
+    "title": "Amazing Grace",
+    "artist": "Traditional",
+    "lyrics": "Verse 1:\nAmazing Grace,\nHow sweet the sound,\nThat saved a wretch like me!\n\nI once was lost,\nBut now am found;\nWas blind, but now I see",
+    "category": "Hymn"
+  },
+  {
+    "id": 2,
+    "title": "How Great Thou Art",
+    "artist": "Carl Boberg",
+    "lyrics": "Verse 1:\nO Lord my God, when I in awesome wonder\nConsider all the worlds Thy hands have made;\nI see the stars, I hear the rolling thunder\nThy power throughout the universe displayed. \n\nChorus:\nThen sings my soul, my Savior God, to Thee:\nHow great Thou art, how great Thou art!\nThen sings my soul, my Savior God, to Thee:\nHow great Thou art, how great Thou art!\n\nVerse 2:\nWhen through the woods, and forest glades I wander\nAnd hear the birds sing sweetly in the trees; \nWhen I look down from lofty mountain grandeur,\nAnd hear the brook, and feel the gentle breeze.\n\nVerse 3:\nAnd when I think that God, His Son not sparing,\nSent Him to die, I scarce can take it in;\nThat on the Cross, my burden gladly bearing\nHe bled and died to take away my sin.",
+    "category": "Hymn"
+  },
+  {
+    "id":3,
+    "title": "Goodness Of God",
+    "lyrics": "I love You, Lord\nFor Your mercy never fails me\nAll my days, I've been held in Your hands\nFrom the moment that I wake up\nUntil I lay my head\nOh, I will sing of the goodness of God\n\nAnd all my life You have been faithful\nAnd all my life You have been so, so good\nWith every breath that I am able\nOh, I will sing of the goodness of God\n\nI love Your voice\nYou have led me through the fire\nIn the darkest night\nYou are close like no other\nI've known You as a Father\nI've known You as a Friend\nAnd I have lived in the goodness of God (yeah)\n\nAnd all my life You have been faithful (oh)\nAnd all my life You have been so, so good\nWith every breath that I am able\nOh, I will sing of the goodness of God (yeah)\n\n'Cause Your goodness is running after, it's running after me\nYour goodness is running after, it's running after me\nWith my life laid down, I'm surrendered now\nI give You everything\n'Cause Your goodness is running after, it's running after me (oh)\n\nYour goodness is running after, it's running after me\nYour goodness is running after, it's running after me\nWith my life laid down, I'm surrendered now\nI give You everything\n'Cause Your goodness is running after\nIt keeps running after me\n\nAnd all my life You have been faithful\nAnd all my life You have been so, so good\nWith every breath that I am able\nOh, I'm gonna sing of the goodness of God\n\nI'm gonna sing, I'm gonna sing\n'Cause all my life You have been faithful\nAnd all my life You have been so, so good\nWith every breath that I am able\nOh, I'm gonna sing of the goodness of God\nOh, I'm gonna sing of the goodness of God\n\nWe love Your praise\nAll for all my days"
+  }
+
+]
