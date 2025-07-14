@@ -91,10 +91,10 @@
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Light shadow */
       padding: 10px 0; /* Vertical padding only */
       border-radius: 5px; /* Rounded corners */
-      margin-bottom: 20px; /* Spacing below */
       width: 100%; /* Full width */
-      margin-left: 0;
-      margin-right: 0;
+      position: fixed; /* Keep header visible */
+      top: 0;
+      z-index: 1000; /* Above other content */
       transition: background-color 0.2s; /* Smooth color transition */
     }
     .header-box:hover {
@@ -128,7 +128,7 @@
       border-right: 1px solid #dee2e6;
       transform: translateX(-100%); /* Hidden by default */
       transition: transform 0.3s ease-in-out;
-      z-index: 1000;
+      z-index: 1001; /* Above header */
       padding: 20px;
       display: flex;
       flex-direction: column;
@@ -161,7 +161,7 @@
       top: 0; 
       right: 0; 
       width: 200px; 
-      z-index: 1000; 
+      z-index: 1002; /* Above header and sidebar */
     }
     .search-input.active { display: block; }
     .btn-subtle { 
@@ -180,6 +180,7 @@
       max-width: 1200px; /* Constrain song list width */
       margin: 0 auto; /* Center content */
       padding: 0 15px; /* Match Bootstrap container padding */
+      margin-top: 70px; /* Prevent content from being hidden under fixed header */
     }
     .row { --bs-gutter-x: 0; } /* Remove grid gutters */
     .no-favorites { 
@@ -232,12 +233,19 @@
     let songs = [];
     let favorites = JSON.parse(localStorage.getItem('favorites')) || [];
 
-    // Validate favorites array
-    if (!Array.isArray(favorites)) {
-      console.warn('Favorites is not an array, resetting:', favorites);
-      favorites = [];
+    // Validate and sanitize favorites array
+    function validateFavorites() {
+      if (!Array.isArray(favorites)) {
+        console.warn('Favorites is not an array, resetting:', favorites);
+        favorites = [];
+      } else {
+        // Ensure only valid song IDs (integers) are kept
+        favorites = favorites.filter(id => Number.isInteger(id) && id > 0);
+        console.log('Sanitized favorites:', favorites);
+      }
       localStorage.setItem('favorites', JSON.stringify(favorites));
     }
+    validateFavorites();
 
     // Load dark mode preference
     if (localStorage.getItem('darkMode') === 'enabled') {
@@ -255,6 +263,10 @@
         .then(data => {
           songs = data;
           console.log('Songs loaded:', songs);
+          // Re-validate favorites against loaded songs
+          favorites = favorites.filter(id => songs.some(song => song.id === id));
+          localStorage.setItem('favorites', JSON.stringify(favorites));
+          console.log('Favorites after song validation:', favorites);
           displaySongs(songs, 'songList');
         })
         .catch(error => console.error('Error loading songs:', error));
@@ -264,6 +276,10 @@
     function displaySongs(songsToShow, containerId) {
       console.log('Displaying songs in container:', containerId, 'Songs:', songsToShow);
       const container = document.getElementById(containerId);
+      if (!container) {
+        console.error(`Container ${containerId} not found`);
+        return;
+      }
       container.innerHTML = '';
       if (songsToShow.length === 0 && containerId === 'favoritesList') {
         container.innerHTML = '<p class="no-favorites">No favorite songs yet. Add some from the lyrics page!</p>';
@@ -291,8 +307,13 @@
     }
 
     function showFavorites() {
+      console.log('Showing favorites, songs available:', songs.length, 'Favorites:', favorites);
       const songList = document.getElementById('songList');
       const favoritesList = document.getElementById('favoritesList');
+      if (!songList || !favoritesList) {
+        console.error('Song list or favorites list not found');
+        return;
+      }
       songList.classList.add('d-none');
       favoritesList.classList.remove('d-none');
       const favoriteSongs = songs.filter(song => favorites.includes(song.id));
@@ -306,14 +327,18 @@
     // Sidebar toggle
     const sidebarToggle = document.getElementById('sidebarToggle');
     const sidebar = document.getElementById('sidebar');
-    sidebarToggle.addEventListener('click', function(e) {
-      e.preventDefault();
-      sidebar.classList.toggle('active');
-    });
+    if (sidebarToggle && sidebar) {
+      sidebarToggle.addEventListener('click', function(e) {
+        e.preventDefault();
+        sidebar.classList.toggle('active');
+      });
+    } else {
+      console.error('Sidebar toggle or sidebar not found');
+    }
 
     // Hide sidebar when clicking outside
     document.addEventListener('click', function(e) {
-      if (!sidebar.contains(e.target) && !sidebarToggle.contains(e.target) && sidebar.classList.contains('active')) {
+      if (sidebar && sidebarToggle && !sidebar.contains(e.target) && !sidebarToggle.contains(e.target) && sidebar.classList.contains('active')) {
         sidebar.classList.remove('active');
       }
     });
@@ -332,57 +357,83 @@
     }
 
     // Dark mode toggle
-    document.getElementById('darkModeToggle').addEventListener('click', function(e) {
-      e.preventDefault();
-      document.body.classList.toggle('dark-mode');
-      if (document.body.classList.contains('dark-mode')) {
-        localStorage.setItem('darkMode', 'enabled');
-        this.textContent = 'Light Mode';
-      } else {
-        localStorage.removeItem('darkMode');
-        this.textContent = 'Dark Mode';
-      }
-      sidebar.classList.remove('active'); // Hide sidebar after clicking
-    });
+    const darkModeToggle = document.getElementById('darkModeToggle');
+    if (darkModeToggle) {
+      darkModeToggle.addEventListener('click', function(e) {
+        e.preventDefault();
+        document.body.classList.toggle('dark-mode');
+        if (document.body.classList.contains('dark-mode')) {
+          localStorage.setItem('darkMode', 'enabled');
+          this.textContent = 'Light Mode';
+        } else {
+          localStorage.removeItem('darkMode');
+          this.textContent = 'Dark Mode';
+        }
+        sidebar.classList.remove('active'); // Hide sidebar after clicking
+      });
+    } else {
+      console.error('Dark mode toggle not found');
+    }
 
     // Search functionality
-    document.getElementById('searchInput').addEventListener('input', function(e) {
-      const query = e.target.value.toLowerCase();
-      const filteredSongs = songs.filter(song =>
-        song.title.toLowerCase().includes(query) || 
-        song.id.toString().includes(query)
-      );
-      console.log('Search query:', query, 'Filtered songs:', filteredSongs);
-      document.getElementById('songList').classList.remove('d-none');
-      document.getElementById('favoritesList').classList.add('d-none');
-      displaySongs(filteredSongs, 'songList');
-    });
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) {
+      searchInput.addEventListener('input', function(e) {
+        const query = e.target.value.toLowerCase();
+        const filteredSongs = songs.filter(song =>
+          song.title.toLowerCase().includes(query) || 
+          song.id.toString().includes(query)
+        );
+        console.log('Search query:', query, 'Filtered songs:', filteredSongs);
+        const songList = document.getElementById('songList');
+        const favoritesList = document.getElementById('favoritesList');
+        if (songList && favoritesList) {
+          songList.classList.remove('d-none');
+          favoritesList.classList.add('d-none');
+          displaySongs(filteredSongs, 'songList');
+        } else {
+          console.error('Song list or favorites list not found during search');
+        }
+      });
+    } else {
+      console.error('Search input not found');
+    }
 
     // Toggle search input visibility
     const searchToggle = document.getElementById('searchToggle');
-    const searchInput = document.getElementById('searchInput');
-    
-    searchToggle.addEventListener('click', function() {
-      searchInput.classList.toggle('active');
-      if (searchInput.classList.contains('active')) {
-        searchInput.focus();
-      } else {
-        searchInput.value = ''; // Clear input when hiding
-        // Reset song list when search is cleared
-        document.getElementById('songList').classList.remove('d-none');
-        document.getElementById('favoritesList').classList.add('d-none');
-        displaySongs(songs, 'songList');
-      }
-    });
+    if (searchToggle && searchInput) {
+      searchToggle.addEventListener('click', function() {
+        searchInput.classList.toggle('active');
+        if (searchInput.classList.contains('active')) {
+          searchInput.focus();
+        } else {
+          searchInput.value = ''; // Clear input when hiding
+          // Reset song list when search is cleared
+          const songList = document.getElementById('songList');
+          const favoritesList = document.getElementById('favoritesList');
+          if (songList && favoritesList) {
+            songList.classList.remove('d-none');
+            favoritesList.classList.add('d-none');
+            displaySongs(songs, 'songList');
+          }
+        }
+      });
+    } else {
+      console.error('Search toggle or input not found');
+    }
 
     // Hide search input when clicking outside and input is empty
     document.addEventListener('click', function(e) {
-      if (!searchToggle.contains(e.target) && !searchInput.contains(e.target) && searchInput.value === '') {
+      if (searchToggle && searchInput && !searchToggle.contains(e.target) && !searchInput.contains(e.target) && searchInput.value === '') {
         searchInput.classList.remove('active');
         // Reset song list when search is cleared
-        document.getElementById('songList').classList.remove('d-none');
-        document.getElementById('favoritesList').classList.add('d-none');
-        displaySongs(songs, 'songList');
+        const songList = document.getElementById('songList');
+        const favoritesList = document.getElementById('favoritesList');
+        if (songList && favoritesList) {
+          songList.classList.remove('d-none');
+          favoritesList.classList.add('d-none');
+          displaySongs(songs, 'songList');
+        }
       }
     });
 
