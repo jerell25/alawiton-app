@@ -45,10 +45,10 @@
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Light shadow */
       padding: 10px 0; /* Vertical padding only */
       border-radius: 5px; /* Rounded corners */
-      margin-bottom: 30px; /* Spacing below */
       width: 100%; /* Full width */
-      margin-left: 0;
-      margin-right: 0;
+      position: fixed; /* Keep header visible */
+      top: 0;
+      z-index: 1000; /* Above other content */
       transition: background-color 0.2s; /* Smooth color transition */
     }
     .header-box:hover {
@@ -88,6 +88,7 @@
       max-width: 1200px; /* Constrain lyrics width */
       margin: 0 auto; /* Center lyrics */
       padding: 0 15px; /* Match Bootstrap container padding */
+      margin-top: 70px; /* Prevent content from being hidden under fixed header */
     }
   </style>
   <!-- PWA Meta Tags -->
@@ -113,6 +114,24 @@
   <script>
     let favorites = JSON.parse(localStorage.getItem('favorites')) || [];
 
+    // Validate and sanitize favorites array
+    function validateFavorites(songs = []) {
+      if (!Array.isArray(favorites)) {
+        console.warn('Favorites is not an array, resetting:', favorites);
+        favorites = [];
+      } else if (songs.length) {
+        // Ensure only valid song IDs (integers matching songs.id) are kept
+        favorites = favorites.filter(id => Number.isInteger(id) && id > 0 && songs.some(song => song.id === id));
+        console.log('Sanitized favorites with songs:', favorites);
+      } else {
+        // Ensure only integers and positive IDs
+        favorites = favorites.filter(id => Number.isInteger(id) && id > 0);
+        console.log('Sanitized favorites without songs:', favorites);
+      }
+      localStorage.setItem('favorites', JSON.stringify(favorites));
+    }
+    validateFavorites();
+
     // Load dark mode preference
     if (localStorage.getItem('darkMode') === 'enabled') {
       document.body.classList.add('dark-mode');
@@ -124,13 +143,21 @@
 
     // Load songs from JSON file
     fetch('songs.json')
-      .then(response => response.json())
+      .then(response => {
+        if (!response.ok) throw new Error('Failed to load songs.json');
+        return response.json();
+      })
       .then(songs => {
+        console.log('Songs loaded in lyrics:', songs);
+        // Re-validate favorites against loaded songs
+        validateFavorites(songs);
         const song = songs.find(s => s.id === songId);
+        const songTitle = document.getElementById('songTitle');
+        const favoriteToggle = document.getElementById('favoriteToggle');
         if (song) {
-          document.getElementById('songTitle').textContent = `${song.id}. ${song.title}`;
+          songTitle.textContent = `${song.id}. ${song.title}`;
           // Update favorite button icon
-          const favoriteIcon = document.getElementById('favoriteToggle').querySelector('i');
+          const favoriteIcon = favoriteToggle.querySelector('i');
           favoriteIcon.className = favorites.includes(songId) ? 'bi bi-star-fill' : 'bi bi-star';
           // Split lyrics into verses by double newlines
           const verses = song.lyrics.split('\n\n');
@@ -142,7 +169,8 @@
             lyricsContainer.appendChild(verseElement);
           });
         } else {
-          document.getElementById('songTitle').textContent = 'Song Not Found';
+          songTitle.textContent = 'Song Not Found';
+          favoriteToggle.disabled = true;
         }
       })
       .catch(error => console.error('Error loading songs:', error));
@@ -152,6 +180,10 @@
     if (favoriteToggle) {
       favoriteToggle.addEventListener('click', function(e) {
         e.preventDefault();
+        if (!songId || isNaN(songId) || songId <= 0) {
+          console.error('No valid song ID:', songId);
+          return;
+        }
         console.log('Favorite toggle clicked, songId:', songId, 'Current favorites:', favorites);
         const favoriteIcon = this.querySelector('i');
         if (favorites.includes(songId)) {
